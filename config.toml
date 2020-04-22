@@ -1,0 +1,7 @@
+baseURL = "https://Crazlion.github.io"
+languageCode = "zh-cn"
+title = "Crazy lion's blog"
+theme = "maupassant"
+
+[author]
+  name = "Crazy lion"
