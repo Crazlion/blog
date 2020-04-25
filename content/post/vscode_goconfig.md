@@ -1,0 +1,34 @@
++++
+title="使用Vscode 搭建 go语言环境"
+tags=["vscode"]
+date="2020-04-25T11:10:45+08:00"
+categories=["vscode"]
++++
+
+## 使用Vscode 搭建 go语言环境
+
+去字节应该是要使用go语言开发  
+goland总是需要验证，激活经常过期，每次找激活码需要花费很久时间
+所以改用vscode开发
+
+## 步骤
+#### 初始步骤
+简单的就不过多记录：  
+* 安装go环境（环境变量、GOROOT、GOPATH）  
+* 安装vscode  
+* 打开vscode插件搜索 go 安装  
+
+#### vscode安装插件 go get被墙问题
+使用代理 https://goproxy.io/
+``` shell
+# 我只运行了前两行 
+go env -w GO111MODULE=on
+go env -w GOPROXY="https://goproxy.io,direct"
+
+# Set environment variable allow bypassing the proxy for selected modules (optional)
+go env -w GOPRIVATE="*.corp.example.com"
+```
+ps: 安装完以后一定要关闭,不然无法启动debug，会提示go module错误
+```
+go env GO111MODULE=off
+```
