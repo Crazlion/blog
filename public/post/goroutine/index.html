@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Go 中的并发 | Crazy lion&#39;s blog</title>
+    <meta property="og:title" content="Go 中的并发 - Crazy lion&#39;s blog">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-05-13T12:00:27&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-05-13T12:00:27&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="Go 中的并发">
+        
+    <meta name="author" content="Crazy lion">
+    <meta property="og:url" content="https://Crazlion.github.io/post/goroutine/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+
+
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://Crazlion.github.io">
+                        Crazy lion&#39;s blog
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://Crazlion.github.io">首页</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#go-中的并发">Go 中的并发</a>
+<ul>
+<li><a href="#线程分类">线程分类</a>
+<ul>
+<li><a href="#用户线程">用户线程</a></li>
+<li><a href="#内核线程">内核线程</a></li>
+</ul></li>
+<li><a href="#go的线程">go的线程</a>
+<ul>
+<li><a href="#验证问题">验证问题</a>
+<ul>
+<li><a href="#验证1">验证1</a></li>
+<li><a href="#验证2">验证2</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#最后总结">最后总结</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Go 中的并发</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年5月13日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://Crazlion.github.io/categories/go'>go</a></span>
+            
+        </div>
+        
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            
+
+<h1 id="go-中的并发">Go 中的并发</h1>
+
+<p>学习一下go的并发策略</p>
+
+<h2 id="线程分类">线程分类</h2>
+
+<p>一般我们都知道线程会分为两类：</p>
+
+<ol>
+<li>内核线程<br /></li>
+<li>用户线程</li>
+</ol>
+
+<h3 id="用户线程">用户线程</h3>
+
+<ul>
+<li><p>用户线程在用户空间中实现，内核并没有直接对用户线程进程调度，内核的调度对象和传统进程一样，还是进程（用户进程）本身，内核并不能看到用户线程，内核并不知道用户线程的存在。</p></li>
+
+<li><p>不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。</p></li>
+
+<li><p>内核资源的分配仍然是按照进程（用户进程）进行分配的；各个用户线程只能在进程内进行资源竞争。</p></li>
+
+<li><p>用户级线程内核的切换由用户态程序自己控制内核切换（通过系统调用来获得内核提供的服务）,不需要内核干涉，少了进出内核态的消耗，但不能很好的利用多核Cpu。目前Linux pthread大体是这么做的。</p></li>
+
+<li><p>每个用户线程并不具有自身的线程上下文。因此，就线程的同时执行而言，任意给定时刻每个进程只能够有一个线程在运行，而且只有一个处理器内核会被分配给该进程。</p></li>
+</ul>
+
+<h3 id="内核线程">内核线程</h3>
+
+<ul>
+<li><p>内核线程又称为守护进程，内核线程的调度由<strong><em>内核负责</em></strong>，一个内核线程处于阻塞状态时不影响其他的内核线程，因为其是调度的基本单位。这与用户线程是不一样的；</p></li>
+
+<li><p>这些线程可以在全系统内进行资源的竞争；</p></li>
+
+<li><p>内核空间内为每一个内核支持线程设置了一个线程控制块（TCB），内核根据该控制块，感知线程的存在，并进行控制。在一定程度上类似于进程，只是创建、调度的开销要比进程小。有的统计是1：10。</p></li>
+
+<li><p>内核线程切换由内核控制，当线程进行切换的时候，由用户态转化为内核态。切换完毕要从内核态返回用户态，即存在用户态和内核态之间的转换，比如多核cpu，还有win线程的实现。</p></li>
+</ul>
+
+<p>ps(自己的一些思考):其实可以看出来，内核线程由内核来实现创建、销毁，是内核的调度策略<br />
+用户线程的话更像是搭载在内核线程之上的，是用户自己定义调度策略，这样就可以只用一个内核线程完成多个用户线程的任务，go的调度策略就是这样的</p>
+
+<h2 id="go的线程">go的线程</h2>
+
+<p>操作系统会在物理处理器上调度线程来运行，而Go语言的运行时会在逻辑处理器上调度goroutine来运行。<br />
+每个逻辑处理器都分别绑定到单个操作系统线程。</p>
+
+<p>在1.5 版本如图所示，可以看到操作系统线程、逻辑处理器和本地运行队列之间的关系。如果创建一个goroutine 并准备运行，这个goroutine 就会被放到调度器的全局运行队列中。
+<img src="/img/20200513122602.png" alt="图6-2" /><br />
+之后，调度器就将这些队列中的goroutine 分配给一个逻辑处理器，并放到这个逻辑处理器对应的本地运行队列上，Go语言的运行时默认会为每个可用的物理处理器分配一个逻辑处理器。在1.5 版本之前的版本中，默认给
+整个应用程序只分配一个逻辑处理器。</p>
+
+<p>在图6-2 中，可以看到操作系统线程、逻辑处理器和本地运行队列之间的关系。如果创建一个goroutine 并准备运行，这个goroutine 就会被放到调度器的全局运行队列中。之后，调度器就将这些队列中的goroutine 分配给一个逻辑处理器，并放到这个逻辑处理器对应的本地运行队列中。本地运行队列中的goroutine 会一直等待直到自己被分配的逻辑处理器执行。</p>
+
+<p>有时，正在运行的goroutine 需要执行一个阻塞的系统调用，如打开一个文件。当这类调用发生时，线程和goroutine 会从逻辑处理器上分离，该线程会继续阻塞，等待系统调用的返回。与此同时，这个逻辑处理器就失去了用来运行的线程。所以，调度器会<strong><em>创建一个新线程</em></strong>，并将其绑定到该逻辑处理器上。之后，调度器会从本地运行队列里选择另一个goroutine 来运行。一旦被阻塞的系统调用执行完成并返回，对应的goroutine 会放回到本地运行队列，而<strong><em>之前的线程会保存好（复用）</em></strong>，以便之后可以继续使用。</p>
+
+<p>基于调度器的内部算法，一个正运行的goroutine 在工作结束前，可以<strong><em>被停止并重新调度</em></strong>。调度器这样做的目的是<strong><em>防止某个goroutine长时间占用逻辑处理器</em></strong>。当goroutine 占用时间过长时，调度器会停止当前正运行的goroutine，并给其他可运行的goroutine 运行的机会。可以通过runtime.GOMAXPROCS(1)来验证这个结论</p>
+
+<h3 id="验证问题">验证问题</h3>
+
+<h4 id="验证1">验证1</h4>
+
+<pre><code class="language-go">package main
+
+import (
+    &quot;fmt&quot;
+    &quot;runtime&quot;
+    &quot;sync&quot;
+)
+
+// main 是所有Go 程序的入口
+func main() {
+    // 分配一个逻辑处理器给调度器使用
+    runtime.GOMAXPROCS(1)
+    // wg 用来等待程序完成
+    // 计数加 2，表示要等待两个goroutine
+    var wg sync.WaitGroup
+    wg.Add(2)
+    fmt.Println(&quot;Start Goroutines&quot;)
+    // 声明一个匿名函数，并创建一个goroutine
+    go func() {
+        // 在函数退出时调用Done 来通知main 函数工作已经完成
+        defer wg.Done()
+        // 显示字母表3 次
+        for count := 0; count &lt; 3; count++ {
+            for char := 'a'; char &lt; 'a'+26; char++ {
+                fmt.Printf(&quot;%c &quot;, char)
+            }
+        }
+    }()
+    // 声明一个匿名函数，并创建一个goroutine
+    go func() {
+        // 在函数退出时调用Done 来通知main 函数工作已经完成
+        defer wg.Done()
+
+        // 显示字母表3 次
+        for count := 0; count &lt; 3; count++ {
+            for char := 'A'; char &lt; 'A'+26; char++ {
+                fmt.Printf(&quot;%c &quot;, char)
+            }
+        }
+    }()
+    // 等待 goroutine 结束
+    fmt.Println(&quot;Waiting To Finish&quot;)
+    wg.Wait()
+    fmt.Println(&quot;\nTerminating Program&quot;)
+}
+</code></pre>
+
+<p>结果为：<br />
+Start Goroutines<br />
+Waiting To Finish<br />
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z A B C D E F G H I J K L M N
+O P Q R S T U V W X Y Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b
+c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p
+q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z<br />
+Terminating Program<br />
+当只有一个核工作的时候只能执行顺序执行（需要函数的运行时间不超过一定的阀值），明明是小写打印在前但是最终的结果是大写打印在前呢</p>
+
+<p>从逻辑处理器的角度展示了这一场景。在第1 步，调度器开始运行goroutine A，而goroutine B 在运行队列里等待调度。之后，在第2 步，调度器交换了goroutine A 和goroutine B。由于goroutine A 并没有完成工作，因此被放回到运行队列。之后，在第3 步，goroutine B 完成了它的工作并被系统销毁。这也让goroutine A 继续之前的工作。
+<img src="/img/20200515080446.png" alt="图" /></p>
+
+<p>上面的程序主要验证的问题：goroutine执行的方式是通过队列</p>
+
+<h4 id="验证2">验证2</h4>
+
+<pre><code class="language-go">// 这个示例程序展示goroutine 调度器是如何在单个线程上
+// 切分时间片的
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;runtime&quot;
+    &quot;sync&quot;
+)
+
+// wg 用来等待程序完成
+var wg sync.WaitGroup
+
+// main 是所有Go 程序的入口
+func main() {
+    // 分配一个逻辑处理器给调度器使用
+    runtime.GOMAXPROCS(1)
+    // 计数加 2，表示要等待两个goroutine
+    wg.Add(2)
+    // 创建两个goroutine
+    fmt.Println(&quot;Create Goroutines&quot;)
+    go printPrime(&quot;A&quot;)
+    go printPrime(&quot;B&quot;)
+    // 等待 goroutine 结束
+    fmt.Println(&quot;Waiting To Finish&quot;)
+    wg.Wait()
+    fmt.Println(&quot;Terminating Program&quot;)
+}
+
+// printPrime 显示 5000 以内的素数值
+func printPrime(prefix string) {
+    // 在函数退出时调用Done 来通知main 函数工作已经完成
+    defer wg.Done()
+next:
+    for outer := 2; outer &lt; 10000; outer++ {
+        for inner := 2; inner &lt; outer; inner++ {
+            if outer%inner == 0 {
+                continue next
+            }
+        }
+        fmt.Printf(&quot;%s:%d\n&quot;, prefix, outer)
+    }
+    fmt.Println(&quot;Completed&quot;, prefix)
+}
+
+</code></pre>
+
+<p>部分结果：
+A:5147<br />
+A:5153<br />
+B:3769<br />
+B:3779</p>
+
+<p>B:7841<br />
+B:7853<br />
+B:7867<br />
+A:9791<br />
+A:9803</p>
+
+<p>goroutine B 先显示素数。一旦goroutine B 打印时间点阀值，调度器就会将正运行的goroutine切换为goroutine A。之后goroutine A 在线程上执行了一段时间，再次切换为goroutine B。这次goroutine B 完成了所有的工作。一旦goroutine B 返回，就会看到线程再次切换到goroutine A 并完成所有的工作。</p>
+
+<p>上面的程序主要验证的问题：调度器会停止一个占用时间过长的goroutine，将资源让给别的goroutine</p>
+
+<h2 id="最后总结">最后总结</h2>
+
+<p>go中的协程其实就是用户线程,由go语言的开发者实现<br />
+调用的方式是通过队列，同时会有时间阀值来控制，保证大家都能得到运行，而不会因为一个goroutine占用时间太多，导致其他goroutine饿死的情况</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/go_reflection/">go的反射</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://Crazlion.github.io/tags/go'>go</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://Crazlion.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/goroutine/" title="Go 中的并发">Go 中的并发</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/go_reflection/" title="go的反射">go的反射</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/vscode_goconfig/" title="使用Vscode 搭建 go语言环境">使用Vscode 搭建 go语言环境</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/blog_build/" title="hugo &#43; github page 搭建自己的博客">hugo &#43; github page 搭建自己的博客</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://Crazlion.github.io/categories/go/">go (2)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/hugo/">hugo (1)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/vscode/">vscode (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://Crazlion.github.io/tags/go/">go</a>
+    
+    <a href="https://Crazlion.github.io/tags/vscode/">vscode</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://Crazlion.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://Crazlion.github.io">Crazy lion&#39;s blog By Crazy lion</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+
+
+
+</body>
+
+</html>

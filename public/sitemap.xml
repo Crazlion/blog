@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://Crazlion.github.io/categories/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/tags/go/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/categories/go/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/post/goroutine/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/post/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/tags/</loc>
+    <lastmod>2020-05-13T12:00:27+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/post/go_reflection/</loc>
+    <lastmod>2020-04-27T11:10:52+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/tags/vscode/</loc>
+    <lastmod>2020-04-25T11:10:45+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/categories/vscode/</loc>
+    <lastmod>2020-04-25T11:10:45+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/post/vscode_goconfig/</loc>
+    <lastmod>2020-04-25T11:10:45+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/categories/hugo/</loc>
+    <lastmod>2020-04-22T17:43:24+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Crazlion.github.io/post/blog_build/</loc>
+    <lastmod>2020-04-22T17:43:24+08:00</lastmod>
+  </url>
+  
+</urlset>

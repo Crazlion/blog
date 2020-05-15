@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Crazy lion&#39;s blog</title>
+    <link>https://Crazlion.github.io/categories/</link>
+    <description>Recent content in Categories on Crazy lion&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 13 May 2020 12:00:27 +0800</lastBuildDate>
+    
+	<atom:link href="https://Crazlion.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>go</title>
+      <link>https://Crazlion.github.io/categories/go/</link>
+      <pubDate>Wed, 13 May 2020 12:00:27 +0800</pubDate>
+      
+      <guid>https://Crazlion.github.io/categories/go/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>vscode</title>
+      <link>https://Crazlion.github.io/categories/vscode/</link>
+      <pubDate>Sat, 25 Apr 2020 11:10:45 +0800</pubDate>
+      
+      <guid>https://Crazlion.github.io/categories/vscode/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>hugo</title>
+      <link>https://Crazlion.github.io/categories/hugo/</link>
+      <pubDate>Wed, 22 Apr 2020 17:43:24 +0800</pubDate>
+      
+      <guid>https://Crazlion.github.io/categories/hugo/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

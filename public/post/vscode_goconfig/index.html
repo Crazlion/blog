@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>使用Vscode 搭建 go语言环境 | Crazy lion&#39;s blog</title>
+    <meta property="og:title" content="使用Vscode 搭建 go语言环境 - Crazy lion&#39;s blog">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-04-25T11:10:45&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-04-25T11:10:45&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="使用Vscode 搭建 go语言环境">
+        
+    <meta name="author" content="Crazy lion">
+    <meta property="og:url" content="https://Crazlion.github.io/post/vscode_goconfig/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+
+
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://Crazlion.github.io">
+                        Crazy lion&#39;s blog
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://Crazlion.github.io">首页</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">使用Vscode 搭建 go语言环境</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年4月25日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://Crazlion.github.io/categories/vscode'>vscode</a></span>
+            
+        </div>
+        
+        
+        
+        <div class="post-content">
+            
+
+<h2 id="使用vscode-搭建-go语言环境">使用Vscode 搭建 go语言环境</h2>
+
+<p>去字节应该是要使用go语言开发<br />
+goland总是需要验证，激活经常过期，每次找激活码需要花费很久时间
+所以改用vscode开发</p>
+
+<h2 id="步骤">步骤</h2>
+
+<h4 id="初始步骤">初始步骤</h4>
+
+<p>简单的就不过多记录：<br />
+* 安装go环境（环境变量、GOROOT、GOPATH）<br />
+* 安装vscode<br />
+* 打开vscode插件搜索 go 安装</p>
+
+<h4 id="vscode安装插件-go-get被墙问题">vscode安装插件 go get被墙问题</h4>
+
+<p>使用代理 <a href="https://goproxy.io/">https://goproxy.io/</a></p>
+
+<pre><code class="language-shell"># 我只运行了前两行 
+go env -w GO111MODULE=on
+go env -w GOPROXY=&quot;https://goproxy.io,direct&quot;
+
+# Set environment variable allow bypassing the proxy for selected modules (optional)
+go env -w GOPRIVATE=&quot;*.corp.example.com&quot;
+</code></pre>
+
+<p>ps: 安装完以后一定要关闭,不然无法启动debug，会提示go module错误</p>
+
+<pre><code>go env GO111MODULE=off
+</code></pre>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://Crazlion.github.io/tags/vscode'>vscode</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://Crazlion.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/goroutine/" title="Go 中的并发">Go 中的并发</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/go_reflection/" title="go的反射">go的反射</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/vscode_goconfig/" title="使用Vscode 搭建 go语言环境">使用Vscode 搭建 go语言环境</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/blog_build/" title="hugo &#43; github page 搭建自己的博客">hugo &#43; github page 搭建自己的博客</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://Crazlion.github.io/categories/go/">go (2)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/hugo/">hugo (1)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/vscode/">vscode (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://Crazlion.github.io/tags/go/">go</a>
+    
+    <a href="https://Crazlion.github.io/tags/vscode/">vscode</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://Crazlion.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://Crazlion.github.io">Crazy lion&#39;s blog By Crazy lion</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+
+
+
+</body>
+
+</html>

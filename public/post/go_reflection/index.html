@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>go的反射 | Crazy lion&#39;s blog</title>
+    <meta property="og:title" content="go的反射 - Crazy lion&#39;s blog">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-04-27T11:10:52&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-04-27T11:10:52&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="go的反射">
+        
+    <meta name="author" content="Crazy lion">
+    <meta property="og:url" content="https://Crazlion.github.io/post/go_reflection/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+
+
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://Crazlion.github.io">
+                        Crazy lion&#39;s blog
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://Crazlion.github.io">首页</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">go的反射</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年4月27日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='https://Crazlion.github.io/categories/go'>go</a></span>
+            
+        </div>
+        
+        
+        
+        <div class="post-content">
+            
+
+<p>最近在学习go的反射，做一下笔记</p>
+
+<h2 id="基本概念">基本概念</h2>
+
+<pre><code class="language-go">func reflectionDemo(a interface{})  {
+    // 获取类型
+    t0 := reflect.TypeOf(a)
+    fmt.Printf(&quot;type of a is:%v\n&quot;, t0)
+    // 获取值
+    v := reflect.ValueOf(a)
+    // 通过值获取类型
+    t1 := v.Type()
+    fmt.Printf(&quot;type of a is:%v\n&quot;, t1)
+    // 通过类型获得分类
+    kind := t1.Kind()
+    // 通过分类来判断是什么类型的
+    switch kind {
+    // 结构体
+    case reflect.Struct:
+        for i := 0; i &lt; v.NumField(); i++ {
+            field := v.Field(i)
+            //打印字段的名称、类型以及值
+            fmt.Printf(&quot;name:%s type:%v value:%v\n&quot;,
+            t1.Field(i).Name, field.Type().Kind(), field.Interface())
+        }
+    // int类型
+    case reflect.Int:
+        fmt.Printf(&quot;%d\n&quot;,v)
+    // string类型
+    case reflect.String:
+        fmt.Printf(&quot;%s\n&quot;,v)
+    // 其他补充
+    default:
+        fmt.Printf(&quot;other\n&quot;)
+    }
+}
+</code></pre>
+
+<h2 id="实践">实践</h2>
+
+<p>因为之前都是写java，访问数据库select的话框架会直接反解成java对象<br />
+写一个简单的查询数据库反解成对象</p>
+
+<p>数据库建表语句</p>
+
+<pre><code class="language-sql">CREATE TABLE `mysql`.`student`  (
+  `id` int(10) NOT NULL auto_increment,
+  `name` varchar(255) NULL DEFAULT NULL,
+  `age` int(10) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB character set= utf8mb4 COMMENT='学生表'
+</code></pre>
+
+<p>go代码</p>
+
+<pre><code class="language-go">// Student对象 通过tag为数据库的列名，必须严格对应
+type Student struct {
+    Id   int    `db:&quot;id&quot;`
+    Name string `db:&quot;name&quot;`
+    Age  int    `db:&quot;age&quot;`
+}
+
+const (
+    DBHostsIp  = &quot;127.0.0.1:3306&quot;
+    DBUserName = &quot;root&quot;
+    DBPassWord = &quot;123456&quot;
+    DBName     = &quot;mysql&quot;
+)
+
+func main() {
+    db, err := sql.Open(&quot;mysql&quot;, DBUserName+&quot;:&quot; +DBPassWord+&quot;@tcp(&quot;+DBHostsIp+&quot;)/&quot;+DBName) // 设置连接数据库的参数
+    CheckErr(err)
+    defer db.Close() //关闭数据库
+    query(db, &amp;Student{})
+}
+
+//查询demo
+func query(db *sql.DB, target interface{}) []interface{} {
+    // 获取值
+    v := reflect.ValueOf(target).Elem()
+    // 获取类型
+    t := v.Type()
+    // rows：返回查询操作的结果集
+    rows, err := db.Query(&quot;SELECT * FROM student&quot;)
+    CheckErr(err)
+    cols, _ := rows.Columns()
+
+    // 用一个列名：索引的map保存信息
+    colsMap := make(map[string]int)
+    for i := 0; i &lt; len(cols); i++ {
+        colsMap[cols[i]] = i
+    }
+
+    // 这里表示一行所有列的值，用[]byte表示
+    vals := make([][]byte, len(cols))
+    // 这里表示一行填充数据
+    line := make([]interface{}, len(cols))
+    // 这里scans引用vals，把数据填充到[]byte里
+    for k, _ := range vals {
+        line[k] = &amp;vals[k]
+    }
+
+    i := 0
+    var resList []interface{}
+    for rows.Next() {
+        // 调用反射创建新对象
+        newStruc := reflect.New(t)
+        // 填充数据
+        rows.Scan(line...)
+        // 把vals中的数据复制到row中
+        for index, v := range line {
+            t := reflect.TypeOf(v)
+            fmt.Printf(&quot;type of a is:%v\n&quot;, t)
+            fmt.Println(&quot;---&quot;, cols[index])
+        }
+
+        // 默认接收的都是byte[],通过类的信息,将byte转换成对应的类型
+        numField := v.NumField()
+        for i := 0; i &lt; numField; i++ {
+            // 通过类型获取字段
+            field := t.Field(i)
+            // 字段的名字
+            name := field.Name
+            // 通过字段获取db的Tag
+            colName := field.Tag.Get(&quot;db&quot;)
+            // 获取新对象中对应的字段
+            turlyField := newStruc.Elem().FieldByName(name)
+            if index, ok := colsMap[colName]; ok {
+                fmt.Println(&quot;print&quot;, colName)
+                switch field.Type.Kind() {
+                case reflect.String:
+                    turlyField.SetString(string(vals[index]))
+                case reflect.Int:
+                    value, err := strconv.Atoi(string(vals[index]))
+                    if err == nil {
+                        turlyField.SetInt(int64(value))
+                    }
+                default:
+                    fmt.Println(&quot;other&quot;)
+                }
+            }
+        }
+        resList = append(resList, newStruc)
+        i++
+    }
+
+    /**
+    * 结果如下
+    * &amp;{1 小明 20}
+    * &amp;{2 小红 18}
+    * &amp;{3 大明 50}
+    */
+    for _,value := range resList {
+        fmt.Println(value)
+    }
+    return resList
+}
+
+</code></pre>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='https://Crazlion.github.io/tags/go'>go</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+</div>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://Crazlion.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/goroutine/" title="Go 中的并发">Go 中的并发</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/go_reflection/" title="go的反射">go的反射</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/vscode_goconfig/" title="使用Vscode 搭建 go语言环境">使用Vscode 搭建 go语言环境</a>
+    </li>
+    
+    <li>
+        <a href="https://Crazlion.github.io/post/blog_build/" title="hugo &#43; github page 搭建自己的博客">hugo &#43; github page 搭建自己的博客</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li><a href="https://Crazlion.github.io/categories/go/">go (2)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/hugo/">hugo (1)</a></li>
+    
+    <li><a href="https://Crazlion.github.io/categories/vscode/">vscode (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="https://Crazlion.github.io/tags/go/">go</a>
+    
+    <a href="https://Crazlion.github.io/tags/vscode/">vscode</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://Crazlion.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer">
+    <div class="container">
+        &copy; 2020 <a href="https://Crazlion.github.io">Crazy lion&#39;s blog By Crazy lion</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="https://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/flysnow-org/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+
+
+
+</body>
+
+</html>
